@@ -3,6 +3,8 @@
  */
 package com.flyover.kube.tools.connector.model;
 
+import java.util.UUID;
+
 
 /**
  * @author mramach
@@ -19,6 +21,10 @@ public class KubeModel extends Model {
 		getMetadata().getLabels().putAll(model.getMetadata().getLabels());
 		getMetadata().getAnnotations().putAll(model.getMetadata().getAnnotations());
 		
+	}
+	
+	public String checksum() {
+		return UUID.randomUUID().toString();
 	}
 	
 	public String getApiVersion() {

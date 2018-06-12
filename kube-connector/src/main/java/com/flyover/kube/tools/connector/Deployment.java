@@ -36,6 +36,11 @@ public class Deployment {
 		return new DeploymentSpec(this.model.getSpec());
 	}
 	
+	public Deployment replicas(int replicas) {
+		this.spec().replicas(replicas);
+		return this;
+	}
+	
 	public Deployment containers(Container c) {
 		this.spec().template().podSpec().containers(c);
 		return this;
@@ -50,20 +55,12 @@ public class Deployment {
 		return this.model;
 	}
 	
-	public Deployment create() {
-		
-		this.model = kube.create(this.model);
-		
-		return this;
-		
-	}
-	
-	public Deployment createOrUpdate() {
+	public Deployment merge() {
 		
 		DeploymentModel found = kube.find(this.model);
 		
 		if(found == null) {
-			create();
+			this.model = kube.create(this.model);
 		} else {
 			this.model = kube.update(found, this.model);
 		}
@@ -126,11 +123,11 @@ public class Deployment {
 		
 		Service service = new Service(kube);
 		service.metadata().setNamespace(metadata().getNamespace());
-		service.metadata().setName(metadata().getName());
+		service.metadata().setName(String.format("%s-%s", metadata().getName(), port));
 		service.spec().selectors().putAll(spec().selector().getMatchLabels());
 		service.spec().tcpPort(port);
 		
-		return service.createOrUpdate();
+		return service.merge();
 		
 	}
 	

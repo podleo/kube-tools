@@ -34,7 +34,7 @@ public class DeploymentExample {
 		try {
 			
 			// create basic nginx deployment
-			Deployment nginx = ns.deployment("nginx", "nginx:latest", 80).create();
+			Deployment nginx = ns.deployment("nginx", "nginx:latest", 80).merge();
 			// wait for deployment to become ready
 			nginx.ready(60, TimeUnit.SECONDS);
 			// expose deployment via service

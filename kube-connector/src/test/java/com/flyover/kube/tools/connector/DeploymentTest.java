@@ -36,57 +36,6 @@ public class DeploymentTest {
 	private static final String NAMESPACE = "test";
 
 	@Test
-	public void testCreate() {
-		
-		Kubernetes kube = new Kubernetes();
-		
-		MockRestServiceServer mockServer = 
-			MockRestServiceServer.createServer(kube.getRestTemplate());
-		
-		setupNamespace(mockServer);
-		
-		ThreadLocal<byte[]> capture = new ThreadLocal<>();
-		
-		mockServer
-			.expect(requestTo(
-					localhost().path("/apis/extensions/v1beta1/namespaces/{namespace}/deployments")
-						.buildAndExpand(NAMESPACE).toUri(), capture))
-			.andExpect(method(POST))
-			.andRespond((res) -> {
-				
-				MockClientHttpResponse response = new MockClientHttpResponse(capture.get(), HttpStatus.OK);
-				response.getHeaders().put("Content-Type", Arrays.asList(APPLICATION_JSON_VALUE));
-				
-				return response;
-				
-			});
-		
-		Namespace ns = kube.namespace(NAMESPACE).findOrCreate();
-		
-		Deployment deployment = ns.deployment("nginx", "nginx:latest", 80);
-		
-		deployment.imagePullSecret(ns.secret("iamgePullSecret"));
-			
-		deployment.create();
-		
-		mockServer.verify();
-		
-		assertNotNull(deployment);
-		assertEquals(NAMESPACE, deployment.metadata().getNamespace());
-		assertEquals("nginx", deployment.metadata().getName());
-		
-		PodSpec podSpec = deployment.spec().template().podSpec();
-		
-		assertNotNull(podSpec);
-		
-		Container container = podSpec.container("nginx");
-		
-		assertNotNull(container);
-		assertEquals("nginx", container.name());
-		
-	}
-	
-	@Test
 	public void testCreateOrUpdate_NotFound() {
 		
 		Kubernetes kube = new Kubernetes();
@@ -130,7 +79,7 @@ public class DeploymentTest {
 		
 		Deployment deployment = ns.deployment("nginx", "nginx:latest", 80);
 		
-		deployment.createOrUpdate();
+		deployment.merge();
 		
 		mockServer.verify();
 		
@@ -188,7 +137,7 @@ public class DeploymentTest {
 		
 		Deployment deployment = ns.deployment("nginx", "nginx:latest", 80);
 			
-		deployment.createOrUpdate();
+		deployment.merge();
 		
 		mockServer.verify();
 		
@@ -356,7 +305,7 @@ public class DeploymentTest {
 		mockServer
 			.expect(requestTo(
 					localhost().path("/api/v1/namespaces/{namespace}/services/{name}")
-						.buildAndExpand(NAMESPACE, "nginx").toUri()))
+						.buildAndExpand(NAMESPACE, "nginx-8080").toUri()))
 			.andExpect(method(GET))
 			.andRespond((res) -> {
 				

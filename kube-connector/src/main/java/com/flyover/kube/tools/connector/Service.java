@@ -31,20 +31,12 @@ public class Service {
 		return new ServiceSpec(this.model.getSpec());
 	}
 	
-	public Service create() {
-		
-		this.model = kube.create(this.model);
-		
-		return this;
-		
-	}
-	
-	public Service createOrUpdate() {
+	public Service merge() {
 		
 		ServiceModel found = kube.find(this.model);
 		
 		if(found == null) {
-			create();
+			this.model = kube.create(this.model);
 		} else {
 			this.model = kube.update(found, this.model);
 		}

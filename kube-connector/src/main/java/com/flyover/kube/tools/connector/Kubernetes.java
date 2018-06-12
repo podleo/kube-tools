@@ -183,6 +183,8 @@ public class Kubernetes {
 	@SuppressWarnings("unchecked")
 	private <T extends KubeModel> T create(URI uri, T model) {
 
+		model.getMetadata().getAnnotations().put("com.flyover.checksum", model.checksum());
+		
 		return (T) restTemplate.postForObject(uri, model, model.getClass());
 		
 	}
@@ -190,6 +192,16 @@ public class Kubernetes {
 	@SuppressWarnings("unchecked")
 	private <T extends KubeModel> T update(URI uri, T existing, T model) {
 
+		String checksum = existing.getMetadata().getAnnotations().getOrDefault("com.flyover.checksum", "");
+		
+		if(model.checksum().equals(checksum)) {
+			return existing;
+		}
+		
+		System.out.println(String.format("change detected, updating model %s", uri));
+		
+		model.getMetadata().getAnnotations().put("com.flyover.checksum", model.checksum());
+		
 		existing.merge(model);
 		
 		return (T) restTemplate.exchange(uri, HttpMethod.PUT, new HttpEntity<>(existing), model.getClass()).getBody();
