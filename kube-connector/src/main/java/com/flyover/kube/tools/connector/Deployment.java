@@ -73,6 +73,10 @@ public class Deployment {
 	
 		this.model = kube.find(this.model);
 		
+		if(this.model == null) {
+			return null;
+		}
+		
 		return this;
 		
 	}
@@ -128,6 +132,18 @@ public class Deployment {
 		service.spec().tcpPort(port);
 		
 		return service.merge();
+		
+	}
+	
+	public Service service(int port) {
+		
+		Service service = new Service(kube);
+		service.metadata().setNamespace(metadata().getNamespace());
+		service.metadata().setName(String.format("%s-%s", metadata().getName(), port));
+		service.spec().selectors().putAll(spec().selector().getMatchLabels());
+		service.spec().tcpPort(port);
+		
+		return service;
 		
 	}
 	

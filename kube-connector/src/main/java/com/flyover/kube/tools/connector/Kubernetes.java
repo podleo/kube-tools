@@ -34,8 +34,20 @@ public class Kubernetes {
 	private RestTemplate restTemplate;
 
 	public Kubernetes() {
-		this.setRestTemplate(new RestTemplate());
-		this.setConfig(new KubernetesConfig());
+		this(new KubernetesConfig());
+	}
+	
+	public Kubernetes(KubernetesConfig config) {
+		
+		RestTemplate restTemplate = new RestTemplate();
+		// apply ssl policy
+		config.getSslPolicy().configure(restTemplate);
+		// apply authenticator
+		config.getAuthenticator().configure(restTemplate);
+		
+		this.setRestTemplate(restTemplate);
+		this.setConfig(config);
+		
 	}
 
 	public void close() {

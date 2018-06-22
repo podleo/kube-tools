@@ -20,12 +20,9 @@ import com.flyover.kube.tools.connector.KubernetesConfig;
 public class KubernetesConfiguration {
 	
 	@Bean
-	public Kubernetes kubernetes(@Autowired(required = false)KubernetesConfig config) {
+	public Kubernetes kubernetes(@Autowired(required = false) KubernetesConfig config) {
 		
-		Kubernetes kube = new Kubernetes();
-		kube.setConfig(config != null ? config : new KubernetesConfig());
-		
-		return kube;
+		return new Kubernetes(config != null ? config : new KubernetesConfig());
 		
 	}
 	
